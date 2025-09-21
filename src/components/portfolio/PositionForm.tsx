@@ -132,7 +132,7 @@ export function PositionForm({ position, onSubmit, trigger }: PositionFormProps)
             <Label htmlFor="source">Source</Label>
             <Select 
               value={formData.source} 
-              onValueChange={(value) => setFormData(prev => ({ ...prev, source: value }))}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, source: value as 'manual' | 'api' }))}
             >
               <SelectTrigger>
                 <SelectValue />

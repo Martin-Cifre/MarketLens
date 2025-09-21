@@ -1,19 +1,13 @@
-# Archivos de build
 Dockerfile
 .dockerignore
-
-# Dependencias pesadas y generadas
 node_modules
-.next
-
-# Archivos de control y VCS
-.git
-*.log
 npm-debug.log
+README.md
+.next
+.git
+package-lock.json
 yarn.lock
 pnpm-lock.yaml
-
-# Archivos locales / tests
-local-*
 test
-README.md
+*.log
+local-*

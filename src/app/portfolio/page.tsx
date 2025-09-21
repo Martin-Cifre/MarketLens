@@ -12,7 +12,7 @@ import { useCryptoStore } from '@/store/crypto';
 import { MOCK_ASSETS } from '@/lib/crypto/mockData';
 import { simulatePriceUpdate } from '@/lib/crypto/mockData';
 import { 
-  BriefcaseBusiness,
+  Briefcase, 
   TrendingUp, 
   TrendingDown, 
   RefreshCw,
@@ -29,20 +29,19 @@ export default function PortfolioPage() {
       if (positions.length > 0) {
         const update = simulatePriceUpdate();
         // Update positions with new prices
-        setPositions(prevPositions => 
-          prevPositions.map(position => {
-            if (position.assetId === update.symbol) {
-              const currentPrice = update.price;
-              const pnl = (currentPrice - position.avgCost) * position.qty;
-              return {
-                ...position,
-                currentPrice,
-                pnl,
-              };
-            }
-            return position;
-          })
-        );
+        const updatedPositions = positions.map(position => {
+          if (position.assetId === update.symbol) {
+            const currentPrice = update.price;
+            const pnl = (currentPrice - position.avgCost) * position.qty;
+            return {
+              ...position,
+              currentPrice,
+              pnl,
+            };
+          }
+          return position;
+        });
+        setPositions(updatedPositions);
       }
     }, 5000);
 
@@ -145,7 +144,7 @@ export default function PortfolioPage() {
                     })}
                   </p>
                 </div>
-                <BriefcaseBusiness className="w-8 h-8 text-muted-foreground" />
+                <Briefcase className="w-8 h-8 text-muted-foreground" />
               </div>
             </CardContent>
           </Card>

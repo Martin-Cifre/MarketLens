@@ -69,6 +69,7 @@ export interface AlertRule {
   operator: 'above' | 'below' | 'crosses';
   threshold: number;
   timeframe: string;
+  channel: 'in_app' | 'email' | 'telegram' | 'webhook';
   isActive: boolean;
   lastFiredAt?: Date;
 }

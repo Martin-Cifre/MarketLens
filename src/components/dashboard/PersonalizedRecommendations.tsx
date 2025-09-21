@@ -44,7 +44,13 @@ export function PersonalizedRecommendations({ className }: PersonalizedRecommend
 
   // Generate personalized tips based on user's portfolio
   const generatePersonalizedTips = () => {
-    const tips = []
+    const tips: Array<{
+      type: string;
+      title: string;
+      description: string;
+      icon: any;
+      action: string;
+    }> = [];
     
     if (positions.length === 0) {
       tips.push({
@@ -83,11 +89,10 @@ export function PersonalizedRecommendations({ className }: PersonalizedRecommend
       if (recentRecommendations.length > 0) {
         recentRecommendations.forEach(rec => {
           const action = rec.action.toLowerCase()
-          const assetName = rec.signal?.asset?.name || "Asset"
           tips.push({
             type: action === "buy" ? "success" : action === "sell" ? "danger" : "info",
             title: `${action.charAt(0).toUpperCase() + action.slice(1)} Signal`,
-            description: `${rec.confidence * 100}% confidence to ${action} ${assetName}`,
+            description: `${rec.confidence * 100}% confidence to ${action}`,
             icon: action === "buy" ? TrendingUp : action === "sell" ? TrendingDown : Target,
             action: "View Details"
           })

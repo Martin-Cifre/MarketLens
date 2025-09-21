@@ -8,21 +8,26 @@ import { db } from "./db"
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db),
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-    EmailProvider({
+    // Only include Google provider if credentials are available
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    })] : []),
+    
+    // Only include Email provider if email configuration is available
+    ...(process.env.EMAIL_SERVER_HOST && process.env.EMAIL_SERVER_USER && process.env.EMAIL_SERVER_PASSWORD ? [EmailProvider({
       server: {
         host: process.env.EMAIL_SERVER_HOST,
-        port: process.env.EMAIL_SERVER_PORT,
+        port: process.env.EMAIL_SERVER_PORT || "587",
         auth: {
           user: process.env.EMAIL_SERVER_USER,
           pass: process.env.EMAIL_SERVER_PASSWORD,
         },
       },
-      from: process.env.EMAIL_FROM,
-    }),
+      from: process.env.EMAIL_FROM || "noreply@marketlens.app",
+    })] : []),
+    
+    // Always include credentials provider for development/testing
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -34,25 +39,30 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        const user = await db.user.findUnique({
-          where: {
-            email: credentials.email
+        try {
+          const user = await db.user.findUnique({
+            where: {
+              email: credentials.email
+            }
+          })
+
+          if (!user) {
+            return null
           }
-        })
 
-        if (!user) {
+          // For demo purposes, we'll allow login without password hashing
+          // In production, you should hash passwords and validate them
+          // const isPasswordValid = await bcrypt.compare(credentials.password, user.password || "")
+          
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            image: user.image,
+          }
+        } catch (error) {
+          console.error("Authorization error:", error)
           return null
-        }
-
-        // For demo purposes, we'll allow login without password hashing
-        // In production, you should hash passwords
-        // const isPasswordValid = await bcrypt.compare(credentials.password, user.password || "")
-        
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
         }
       }
     })
@@ -62,7 +72,6 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/auth/signin",
-    signUp: "/auth/signup",
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -72,10 +81,11 @@ export const authOptions: NextAuthOptions = {
       return token
     },
     async session({ session, token }) {
-      if (token) {
+      if (token?.sub && session.user) {
         session.user.id = token.sub
       }
       return session
     },
   },
+  debug: process.env.NODE_ENV === "development",
 }

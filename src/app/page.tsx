@@ -1,28 +1,19 @@
-"use client";
+'use client';
 
-export const dynamic = "force-dynamic";
-
-import { useEffect } from "react";
-import { useSession, signOut } from "next-auth/react";
-import { MarketOverview } from "@/components/dashboard/MarketOverview";
-import { SignalsOverview } from "@/components/dashboard/SignalsOverview";
-import { PersonalizedRecommendations } from "@/components/dashboard/PersonalizedRecommendations";
-import { PortfolioSummaryCard } from "@/components/portfolio/PortfolioSummary";
-import { useCryptoStore } from "@/store/crypto";
-import { useUserData } from "@/hooks/use-user-data";
-import { useUserStore } from "@/store/user";
-import { simulatePriceUpdate } from "@/lib/crypto/mockData";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect } from 'react';
+import { useSession, signOut } from 'next-auth/react';
+import { MarketOverview } from '@/components/dashboard/MarketOverview';
+import { SignalsOverview } from '@/components/dashboard/SignalsOverview';
+import { PersonalizedRecommendations } from '@/components/dashboard/PersonalizedRecommendations';
+import { PortfolioSummaryCard } from '@/components/portfolio/PortfolioSummary';
+import { useCryptoStore } from '@/store/crypto';
+import { useUserData } from '@/hooks/use-user-data';
+import { useUserStore } from '@/store/user';
+import { simulatePriceUpdate } from '@/lib/crypto/mockData';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,8 +21,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Icons } from "@/components/ui/icons";
+} from '@/components/ui/dropdown-menu';
+import { Icons } from '@/components/ui/icons';
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -39,11 +30,41 @@ export default function Home() {
   const { refreshUserData } = useUserData();
   const { positions } = useUserStore();
 
+  // Calculate portfolio summary from positions
+  const calculatePortfolioSummary = (positions: any[]) => {
+    if (!positions || positions.length === 0) return null;
+    
+    const totalValue = positions.reduce((sum, position) => {
+      return sum + (position.qty * (position.currentPrice || position.avgCost));
+    }, 0);
+
+    const totalCost = positions.reduce((sum, position) => {
+      return sum + (position.qty * position.avgCost);
+    }, 0);
+
+    const totalPnl = totalValue - totalCost;
+    const totalPnlPercent = totalCost > 0 ? (totalPnl / totalCost) * 100 : 0;
+
+    return {
+      totalValue,
+      totalPnl,
+      totalPnlPercent,
+      positions: positions.map(p => ({
+        ...p,
+        currentPrice: p.currentPrice || p.avgCost,
+        pnl: (p.currentPrice || p.avgCost) - p.avgCost
+      }))
+    };
+  };
+
+  const portfolioSummary = calculatePortfolioSummary(positions);
+
+  // Simulate real-time price updates
   useEffect(() => {
     const interval = setInterval(() => {
       const update = simulatePriceUpdate();
       updateAssetPrice(update.symbol, update.price, update.change);
-    }, 5000);
+    }, 5000); // Update every 5 seconds
 
     return () => clearInterval(interval);
   }, [updateAssetPrice]);
@@ -61,7 +82,7 @@ export default function Home() {
                   Advanced market tracking and trading insights
                 </p>
               </div>
-
+              
               {/* Navigation */}
               <NavigationMenu>
                 <NavigationMenuList>
@@ -70,23 +91,17 @@ export default function Home() {
                     <NavigationMenuContent>
                       <div className="grid gap-3 p-6 w-[400px]">
                         <NavigationMenuLink asChild>
-                          <Link
-                            href="/"
-                            className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                          >
-                            <div className="text-sm font-medium leading-none">
-                              Market Overview
-                            </div>
+                          <Link href="/" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                            <div className="text-sm font-medium leading-none">Market Overview</div>
                             <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                              Real-time market prices and data across multiple
-                              asset classes
+                              Real-time market prices and data across multiple asset classes
                             </p>
                           </Link>
                         </NavigationMenuLink>
                       </div>
                     </NavigationMenuContent>
                   </NavigationMenuItem>
-
+                  
                   <NavigationMenuItem>
                     <Link href="/signals" legacyBehavior passHref>
                       <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
@@ -94,7 +109,7 @@ export default function Home() {
                       </NavigationMenuLink>
                     </Link>
                   </NavigationMenuItem>
-
+                  
                   <NavigationMenuItem>
                     <Link href="/alerts" legacyBehavior passHref>
                       <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
@@ -102,7 +117,7 @@ export default function Home() {
                       </NavigationMenuLink>
                     </Link>
                   </NavigationMenuItem>
-
+                  
                   <NavigationMenuItem>
                     <Link href="/portfolio" legacyBehavior passHref>
                       <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
@@ -113,13 +128,13 @@ export default function Home() {
                 </NavigationMenuList>
               </NavigationMenu>
             </div>
-
+            
             <div className="flex items-center gap-4">
               <div className="text-sm text-muted-foreground">
                 Live Market Data
               </div>
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-
+              
               {status === "loading" ? (
                 <Icons.spinner className="h-6 w-6 animate-spin" />
               ) : session ? (
@@ -129,26 +144,16 @@ export default function Home() {
                   </Link>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="relative h-8 w-8 rounded-full"
-                      >
+                      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                         <Avatar className="h-8 w-8">
-                          <AvatarImage
-                            src={session.user?.image || ""}
-                            alt={session.user?.name || ""}
-                          />
+                          <AvatarImage src={session.user?.image || ""} alt={session.user?.name || ""} />
                           <AvatarFallback>
                             {session.user?.name?.charAt(0).toUpperCase() || "U"}
                           </AvatarFallback>
                         </Avatar>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="w-56"
-                      align="end"
-                      forceMount
-                    >
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
                       <DropdownMenuLabel className="font-normal">
                         <div className="flex flex-col space-y-1">
                           <p className="text-sm font-medium leading-none">
@@ -194,29 +199,29 @@ export default function Home() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Left Column - Market Overview */}
           <div className="lg:col-span-3">
             <MarketOverview />
           </div>
+          
+          {/* Right Column - Portfolio and Signals */}
           <div className="space-y-6">
-            <PortfolioSummaryCard
-              portfolio={positions.length > 0 ? positions : null}
-            />
+            <PortfolioSummaryCard portfolio={portfolioSummary} />
             <PersonalizedRecommendations />
             <SignalsOverview />
           </div>
         </div>
-
+        
         {/* Disclaimer */}
         <div className="mt-12 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
           <h3 className="text-lg font-semibold text-yellow-800 mb-2">
             Important Disclaimer
           </h3>
           <p className="text-yellow-700 text-sm">
-            This application provides educational signals and market data only.
-            It does not constitute financial advice. Trading financial
-            instruments involves significant risk and you should only trade with
-            money you can afford to lose. Past performance is not indicative of
-            future results.
+            This application provides educational signals and market data only. 
+            It does not constitute financial advice. Trading financial instruments involves 
+            significant risk and you should only trade with money you can afford to lose. 
+            Past performance is not indicative of future results.
           </p>
         </div>
       </main>

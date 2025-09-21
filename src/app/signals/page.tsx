@@ -68,7 +68,7 @@ export default function SignalsPage() {
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Generate new signals for all assets
-      const newSignals = [];
+      const newSignals: Signal[] = [];
       const assetIds = ['1', '2', '3', '4', '5']; // Mock asset IDs
       const timeframes = ['1h', '4h', '1d'];
       

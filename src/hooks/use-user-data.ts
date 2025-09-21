@@ -15,17 +15,6 @@ export function useUserData() {
 
   useEffect(() => {
     if (session?.user) {
-      // Set user data in store
-      setUser({
-        id: session.user.id,
-        email: session.user.email || "",
-        name: session.user.name || "",
-        image: session.user.image || "",
-        role: "USER",
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-
       // Fetch user data from API
       fetchUserData()
     } else {
