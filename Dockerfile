@@ -44,6 +44,7 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/server.ts ./server.ts
 COPY --from=builder /app/src ./src
+COPY --from=builder /app/db ./db
 # (opcional, por si tu server/next los requiere)
 COPY --from=builder /app/next.config.* ./
 COPY --from=builder /app/tsconfig.json ./
