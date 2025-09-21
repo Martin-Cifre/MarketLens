@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { AlertRule } from '@/types/crypto';
+import { useState, useEffect } from 'react';
+import { AlertRule, EnrichedAsset } from '@/types/crypto';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatPercent } from '@/lib/crypto/utils';
-import { MOCK_ASSETS } from '@/lib/crypto/mockData';
+import { fetchAssets } from '@/lib/crypto/mockData'; // Import fetchAssets
 import { 
   Plus, 
   Edit, 
@@ -93,7 +93,7 @@ export function AlertManager({
   };
 
   const getAlertDescription = (alert: AlertRule) => {
-    const asset = MOCK_ASSETS.find(a => a.id === alert.assetId);
+    const asset = assets.find(a => a.id === alert.assetId); // Use fetched assets
     const assetSymbol = asset?.symbol || alert.assetId;
     
     switch (alert.type) {
@@ -209,7 +209,7 @@ export function AlertManager({
           </TableHeader>
           <TableBody>
             {alerts.map((alert) => {
-              const asset = MOCK_ASSETS.find(a => a.id === alert.assetId);
+              const asset = assets.find(a => a.id === alert.assetId); // Use fetched assets
               
               return (
                 <TableRow key={alert.id}>
@@ -307,7 +307,7 @@ function AlertForm({ formData, setFormData, onSubmit }: AlertFormProps) {
             <SelectValue placeholder="Select an asset" />
           </SelectTrigger>
           <SelectContent>
-            {MOCK_ASSETS.map((asset) => (
+            {assets.map((asset) => ( // Use fetched assets
               <SelectItem key={asset.id} value={asset.id}>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold">{asset.symbol}</span>

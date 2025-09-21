@@ -11,6 +11,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit } from 'lucide-react';
 import { MOCK_ASSETS } from '@/lib/crypto/mockData';
+import { useState, useEffect } from 'react';
+import { Position, EnrichedAsset } from '@/types/crypto'; // Add EnrichedAsset
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label }mport { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge }mport { Plus, Edit } from 'lucide-react';
+import { fetchAssets } from '@/lib/crypto/mockData'; // Import fetchAssets
 import { formatCurrency } from '@/lib/crypto/utils';
 
 interface PositionFormProps {
@@ -27,6 +36,19 @@ export function PositionForm({ position, onSubmit, trigger }: PositionFormProps)
     avgCost: position?.avgCost.toString() || '',
     source: position?.source || 'manual',
   });
+  const [assets, setAssets] = useState<EnrichedAsset[]>([]); // State to store fetched assets
+
+  useEffect(() => {
+    const loadAssets = async () => {
+      try {
+        const data = await fetchAssets();
+        setAssets(data);
+      } catch (error) {
+        console.error('Error loading assets for position form:', error);
+      }
+    };
+    loadAssets();
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +72,7 @@ export function PositionForm({ position, onSubmit, trigger }: PositionFormProps)
     });
   };
 
-  const selectedAsset = MOCK_ASSETS.find(asset => asset.id === formData.assetId);
+  const selectedAsset = assets.find(asset => asset.id === formData.assetId); // Use fetched assets
   const marketValue = formData.qty && formData.avgCost ? 
     parseFloat(formData.qty) * parseFloat(formData.avgCost) : 0;
 
@@ -84,7 +106,7 @@ export function PositionForm({ position, onSubmit, trigger }: PositionFormProps)
                 <SelectValue placeholder="Select an asset" />
               </SelectTrigger>
               <SelectContent>
-                {MOCK_ASSETS.map((asset) => (
+                {assets.map((asset) => (
                   <SelectItem key={asset.id} value={asset.id}>
                     <div className="flex items-center gap-2">
                       <span className="font-semibold">{asset.symbol}</span>

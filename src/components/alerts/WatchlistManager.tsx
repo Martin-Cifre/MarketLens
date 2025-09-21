@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { EnrichedAsset } from '@/types/crypto'; // Add EnrichedAsset
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { MOCK_ASSETS } from '@/lib/crypto/mockData';
+import { fetchAssets } from '@/lib/crypto/mockData'; // Import fetchAssets
 import { formatCurrency, formatPercent, formatLargeNumber } from '@/lib/crypto/utils';
 import { 
   Plus, 
@@ -75,13 +76,13 @@ export function WatchlistManager({
     });
   };
 
-  const filteredAssets = MOCK_ASSETS.filter(asset =>
+  const filteredAssets = assets.filter(asset => // Use fetched assets
     asset.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
     asset.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getWatchlistAssetData = (assetId: string) => {
-    return MOCK_ASSETS.find(asset => asset.id === assetId);
+    return assets.find(asset => asset.id === assetId); // Use fetched assets
   };
 
   const getPriceTargetStatus = (currentPrice: number, targetPrice?: number, stopLoss?: number) => {
@@ -360,7 +361,7 @@ function WatchlistForm({ formData, setFormData, onSubmit }: WatchlistFormProps) 
             <SelectValue placeholder="Select an asset" />
           </SelectTrigger>
           <SelectContent>
-            {MOCK_ASSETS.map((asset) => (
+            {assets.map((asset) => ( // Use fetched assets
               <SelectItem key={asset.id} value={asset.id}>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold">{asset.symbol}</span>
