@@ -4,6 +4,7 @@ import EmailProvider from "next-auth/providers/email"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { db } from "./db"
+import bcrypt from "bcryptjs"
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db),
@@ -46,13 +47,15 @@ export const authOptions: NextAuthOptions = {
             }
           })
 
-          if (!user) {
+          if (!user || !user.password) {
             return null
           }
 
-          // For demo purposes, we'll allow login without password hashing
-          // In production, you should hash passwords and validate them
-          // const isPasswordValid = await bcrypt.compare(credentials.password, user.password || "")
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+
+          if (!isPasswordValid) {
+            return null
+          }
           
           return {
             id: user.id,

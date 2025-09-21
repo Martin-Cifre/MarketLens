@@ -33,8 +33,7 @@ export async function POST(req: NextRequest) {
       data: {
         name,
         email,
-        // In a real app, you would store the hashed password
-        // For demo purposes, we're not storing it since we're using simple auth
+        password: hashedPassword,
       }
     })
 
