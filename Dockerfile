@@ -6,6 +6,7 @@ WORKDIR /app
 
 # Copiamos manifests (el * permite que no falle si no hay lock)
 COPY package.json package-lock.json* ./
+COPY prisma ./prisma
 
 # Si hay package-lock => npm ci; si no => npm install
 RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
