@@ -12,7 +12,7 @@ import { useCryptoStore } from '@/store/crypto';
 import { MOCK_ASSETS } from '@/lib/crypto/mockData';
 import { simulatePriceUpdate } from '@/lib/crypto/mockData';
 import { 
-  Portfolio, 
+  BriefcaseBusiness,
   TrendingUp, 
   TrendingDown, 
   RefreshCw,
@@ -145,7 +145,7 @@ export default function PortfolioPage() {
                     })}
                   </p>
                 </div>
-                <Portfolio className="w-8 h-8 text-muted-foreground" />
+                <BriefcaseBusiness className="w-8 h-8 text-muted-foreground" />
               </div>
             </CardContent>
           </Card>
