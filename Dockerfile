@@ -34,6 +34,7 @@ ENV NODE_ENV=production
 
 # Solo dependencias de producción
 COPY package.json package-lock.json* ./
+COPY --from=builder /app/prisma ./prisma
 RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi
 
 # Copiamos artefactos y código necesario en runtime
@@ -43,14 +44,10 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/server.ts ./server.ts
 COPY --from=builder /app/src ./src
-COPY --from=builder /app/prisma ./prisma
 # (opcional, por si tu server/next los requiere)
 COPY --from=builder /app/next.config.* ./
 COPY --from=builder /app/tsconfig.json ./
 COPY --from=builder /app/.env.example ./.env.example
-
-# Aseguramos el cliente de Prisma en la imagen final
-RUN npx prisma generate
 
 EXPOSE 3000
 CMD ["npm", "start"]
