@@ -2,6 +2,12 @@ export interface Asset {
   id: string;
   symbol: string;
   name: string;
+  metadata?: string; // Optional JSON string for additional asset data
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface EnrichedAsset extends Asset {
   price: number;
   change24h: number;
   volume24h: number;

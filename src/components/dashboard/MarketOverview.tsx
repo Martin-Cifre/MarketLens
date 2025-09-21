@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Asset } from '@/types/crypto';
+import { EnrichedAsset } from '@/types/crypto';
 import { CryptoCard } from '@/components/crypto/CryptoCard';
 import { useCryptoStore } from '@/store/crypto';
 import { fetchAssets } from '@/lib/crypto/mockData';

@@ -1,63 +1,9 @@
-import { Asset, PriceData, Signal, TechnicalIndicators } from '@/types/crypto';
+import { Asset, EnrichedAsset, PriceData, Signal, TechnicalIndicators } from '@/types/crypto';
 import { calculateTechnicalIndicators, generateSignalScore, getSignalLabel } from './utils';
+import axios from 'axios';
 
-// Mock data for initial development
-export const MOCK_ASSETS: Asset[] = [
-  {
-    id: '1',
-    symbol: 'BTC',
-    name: 'Bitcoin',
-    price: 43250.50,
-    change24h: 2.5,
-    volume24h: 28500000000,
-    marketCap: 847000000000,
-    lastUpdated: new Date(),
-  },
-  {
-    id: '2',
-    symbol: 'ETH',
-    name: 'Ethereum',
-    price: 2580.75,
-    change24h: -1.2,
-    volume24h: 15200000000,
-    marketCap: 310000000000,
-    lastUpdated: new Date(),
-  },
-  {
-    id: '3',
-    symbol: 'SOL',
-    name: 'Solana',
-    price: 98.45,
-    change24h: 5.8,
-    volume24h: 2100000000,
-    marketCap: 42000000000,
-    lastUpdated: new Date(),
-  },
-  {
-    id: '4',
-    symbol: 'ADA',
-    name: 'Cardano',
-    price: 0.58,
-    change24h: 0.8,
-    volume24h: 450000000,
-    marketCap: 20500000000,
-    lastUpdated: new Date(),
-  },
-  {
-    id: '5',
-    symbol: 'BNB',
-    name: 'Binance Coin',
-    price: 315.20,
-    change24h: -0.5,
-    volume24h: 1200000000,
-    marketCap: 48500000000,
-    lastUpdated: new Date(),
-  },
-];
-
-export function generateMockPriceData(symbol: string, days: number = 30): PriceData[] {
+export function generateMockPriceData(basePrice: number, days: number = 30): PriceData[] {
   const data: PriceData[] = [];
-  const basePrice = MOCK_ASSETS.find(asset => asset.symbol === symbol)?.price || 100;
   let currentPrice = basePrice;
   
   const now = Date.now();
@@ -88,9 +34,10 @@ export function generateMockPriceData(symbol: string, days: number = 30): PriceD
   return data;
 }
 
-export function generateMockSignal(assetId: string, timeframe: string): Signal {
+export async function generateMockSignal(assetId: string, assetSymbol: string, timeframe: string): Promise<Signal> {
   const priceData = generateMockPriceData(
-    MOCK_ASSETS.find(asset => asset.id === assetId)?.symbol || 'BTC',
+    // Need a base price here. For now, just use a random one.
+    Math.random() * 1000 + 100,
     7
   );
   
@@ -144,24 +91,27 @@ function generateSignalExplanation(indicators: TechnicalIndicators, score: numbe
   return reasons.join('. ') + '.';
 }
 
-export function generateMockSignals(): Signal[] {
+export async function generateMockSignals(): Promise<Signal[]> {
   const signals: Signal[] = [];
   const timeframes = ['1h', '4h', '1d'];
-  
-  MOCK_ASSETS.forEach(asset => {
-    timeframes.forEach(timeframe => {
+
+  const assets = await fetchAssets(); // Fetch assets from the API
+
+  for (const asset of assets) {
+    for (const timeframe of timeframes) {
       if (Math.random() > 0.7) { // 30% chance of signal for each asset/timeframe
-        signals.push(generateMockSignal(asset.id, timeframe));
+        signals.push(await generateMockSignal(asset.id, asset.symbol, timeframe));
       }
-    });
-  });
+    }
+  }
   
   return signals.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 }
 
 // Simulate real-time price updates
-export function simulatePriceUpdate(): { symbol: string; price: number; change: number } {
-  const asset = MOCK_ASSETS[Math.floor(Math.random() * MOCK_ASSETS.length)];
+export async function simulatePriceUpdate(): Promise<{ symbol: string; price: number; change: number }> {
+  const assets = await fetchAssets(); // Fetch assets from the API
+  const asset = assets[Math.floor(Math.random() * assets.length)];
   const changePercent = (Math.random() - 0.5) * 0.5; // -0.25% to +0.25%
   const newPrice = asset.price * (1 + changePercent / 100);
   const newChange = asset.change24h + changePercent;
@@ -174,10 +124,32 @@ export function simulatePriceUpdate(): { symbol: string; price: number; change: 
 }
 
 // Mock API functions
-export async function fetchAssets(): Promise<Asset[]> {
+export async function fetchAssets(): Promise<EnrichedAsset[]> {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 100));
-  return MOCK_ASSETS;
+
+  const response = await axios.get<Asset[]>('/api/asset');
+  const basicAssets = response.data;
+
+  // Enrich assets with mock price data
+  const enrichedAssets: EnrichedAsset[] = basicAssets.map(asset => {
+    const basePrice = Math.random() * 1000 + 100; // Generate a random base price
+    const change24h = (Math.random() - 0.5) * 10; // Random change
+    const volume24h = Math.random() * 10000000000; // Random volume
+    const marketCap = Math.random() * 1000000000000; // Random market cap
+    const lastUpdated = new Date();
+
+    return {
+      ...asset,
+      price: basePrice,
+      change24h,
+      volume24h,
+      marketCap,
+      lastUpdated,
+    };
+  });
+
+  return enrichedAssets;
 }
 
 export async function fetchPriceData(symbol: string, timeframe: string = '1h', limit: number = 100): Promise<PriceData[]> {
@@ -200,13 +172,15 @@ export async function fetchPriceData(symbol: string, timeframe: string = '1h', l
       break;
   }
   
-  return generateMockPriceData(symbol, days).slice(-limit);
+  // Need to get the base price for the symbol. For now, just use a random one.
+  const basePrice = Math.random() * 1000 + 100;
+  return generateMockPriceData(basePrice, days).slice(-limit);
 }
 
 export async function fetchSignals(assetId?: string): Promise<Signal[]> {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 150));
   
-  const signals = generateMockSignals();
+  const signals = await generateMockSignals();
   return assetId ? signals.filter(signal => signal.assetId === assetId) : signals;
 }

@@ -1,10 +1,10 @@
 import { create } from 'zustand';
-import { Asset, Signal, Recommendation, PortfolioSummary, Position, AlertRule, PriceData } from '@/types/crypto';
+import { Asset, EnrichedAsset, Signal, Recommendation, PortfolioSummary, Position, AlertRule, PriceData } from '@/types/crypto';
 
 interface CryptoStore {
   // Market data
-  assets: Asset[];
-  selectedAsset: Asset | null;
+  assets: EnrichedAsset[];
+  selectedAsset: EnrichedAsset | null;
   timeFrame: string;
   priceData: Record<string, PriceData[]>;
   
@@ -24,8 +24,8 @@ interface CryptoStore {
   error: string | null;
   
   // Actions
-  setAssets: (assets: Asset[]) => void;
-  setSelectedAsset: (asset: Asset | null) => void;
+  setAssets: (assets: EnrichedAsset[]) => void;
+  setSelectedAsset: (asset: EnrichedAsset | null) => void;
   setTimeFrame: (timeFrame: string) => void;
   setPriceData: (symbol: string, data: PriceData[]) => void;
   setPortfolio: (portfolio: PortfolioSummary) => void;
