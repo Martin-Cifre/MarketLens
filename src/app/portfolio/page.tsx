@@ -9,8 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useCryptoStore } from '@/store/crypto';
-import { MOCK_ASSETS } from '@/lib/crypto/mockData';
-import { simulatePriceUpdate } from '@/lib/crypto/mockData';
+import { simulatePriceUpdate, fetchAssets } from '@/lib/crypto/mockData';
 import { 
   Briefcase, 
   TrendingUp, 
@@ -53,7 +52,7 @@ export default function PortfolioPage() {
       id: `pos_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       ...positionData,
       createdAt: new Date(),
-      currentPrice: MOCK_ASSETS.find(asset => asset.id === positionData.assetId)?.price || positionData.avgCost,
+      currentPrice: (await fetchAssets()).find(asset => asset.id === positionData.assetId)?.price || positionData.avgCost,
       pnl: 0,
     };
 

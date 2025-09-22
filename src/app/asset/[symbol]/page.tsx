@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCryptoStore } from '@/store/crypto';
-import { fetchPriceData, fetchSignals, MOCK_ASSETS } from '@/lib/crypto/mockData';
+import { fetchPriceData, fetchSignals } from '@/lib/crypto/mockData';
 import { calculateTechnicalIndicators } from '@/lib/crypto/utils';
 import { 
   ArrowLeft, 
@@ -43,8 +43,7 @@ export default function AssetDetailPage() {
         setIsLoading(true);
         
         // Find asset in store or mock data
-        const foundAsset = assets.find(a => a.symbol === symbol) || 
-                         MOCK_ASSETS.find(a => a.symbol === symbol);
+        const foundAsset = assets.find(a => a.symbol === symbol);
         
         if (!foundAsset) {
           setError('Asset not found');
